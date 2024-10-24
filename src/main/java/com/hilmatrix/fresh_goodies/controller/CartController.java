@@ -17,17 +17,18 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/v1/products")
-public class ProductController {
+@RequestMapping("/api/v1/cart")
+public class CartController {
+
 
     @GetMapping
-    public List<Map<String, Object>> getAllProducts() throws IOException {
-        return JsonData.instance.products != null ? JsonData.instance.products : new ArrayList<>();
+    public List<Map<String, Object>> getCartItems() throws IOException {
+        return JsonData.instance.cart != null ? JsonData.instance.cart : new ArrayList<>();
     }
 
     @GetMapping("/{id}")
-    public Map<String, Object> getProduct(@PathVariable int id) {
-        Optional<Map<String, Object>> product = JsonData.instance.products.stream()
+    public Map<String, Object> getCartItem(@PathVariable int id) {
+        Optional<Map<String, Object>> product = JsonData.instance.cart.stream()
                 .filter(p -> Integer.parseInt((String) p.get("id")) == id)
                 .findFirst();
 
@@ -35,19 +36,17 @@ public class ProductController {
     }
 
     @PostMapping
-    public String createProduct() {
+    public String createCartItem() {
         return "Product created";
     }
 
     @PutMapping("/{id}")
-    public String updateProduct(@PathVariable Long id) {
-        // Add your logic to update the product with the given id
-        return "Product with id " + id + " updated";
+    public String updateCart(@PathVariable Long id) {
+        return "Cart with id " + id + " updated";
     }
 
     @DeleteMapping("/{id}")
-    public String deleteProduct(@PathVariable Long id) {
-        // Add your logic to delete the product with the given id
-        return "Product with id " + id + " deleted";
+    public String deleteCartItem(@PathVariable Long id) {
+        return "Cart with id " + id + " deleted";
     }
 }
