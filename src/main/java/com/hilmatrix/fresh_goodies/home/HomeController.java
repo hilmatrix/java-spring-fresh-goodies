@@ -1,4 +1,4 @@
-package com.hilmatrix.fresh_goodies.controller;
+package com.hilmatrix.fresh_goodies.home;
 
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.web.bind.annotation.*;
