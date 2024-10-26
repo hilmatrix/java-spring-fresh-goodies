@@ -1,7 +1,5 @@
 package com.hilmatrix.fresh_goodies.cart;
 
-
-
 import com.hilmatrix.fresh_goodies.response.ApiConstants;
 import com.hilmatrix.fresh_goodies.response.ApiResponse;
 import org.springframework.http.MediaType;

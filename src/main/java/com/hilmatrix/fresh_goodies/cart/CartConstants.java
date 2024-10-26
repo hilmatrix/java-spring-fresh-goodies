@@ -1,13 +1,5 @@
 package com.hilmatrix.fresh_goodies.cart;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 public class CartConstants {
     public static final String MESSAGE_SUCCESS_GET_ALL = "Success returning all cart items";
     public static final String MESSAGE_SUCCESS_GET = "Success returning one cart item";
