@@ -20,27 +20,15 @@ public class ApiResponse<T> {
 
     }
 
-    public ApiResponse Success(String message, T data) {
-        this.message = message;
-        status = ApiConstants.STATUS_SUCCESS;
-        success = true;
-        this.data = data;
-        return this;
+    public static <T> ApiResponse<T> Success(String message, T data) {
+        return new ApiResponse<>(message, ApiConstants.STATUS_SUCCESS, true, data);
     }
 
-    public ApiResponse NotFound(String message, T data) {
-        this.message = message;
-        status = ApiConstants.STATUS_NOT_FOUND;
-        success = false;
-        this.data = data;
-        return this;
+    public static <T> ApiResponse<T> NotFound(String message, T data) {
+        return new ApiResponse<>(message, ApiConstants.STATUS_NOT_FOUND, false, data);
     }
 
-    public ApiResponse Conflict(String message, T data) {
-        this.message = message;
-        status = ApiConstants.STATUS_CONFLICT;
-        success = false;
-        this.data = data;
-        return this;
+    public static <T> ApiResponse<T> Conflict(String message, T data) {
+        return new ApiResponse<>(message, ApiConstants.STATUS_CONFLICT, false, data);
     }
 }

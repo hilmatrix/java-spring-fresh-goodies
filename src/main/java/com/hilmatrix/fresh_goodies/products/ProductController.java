@@ -1,11 +1,14 @@
 package com.hilmatrix.fresh_goodies.products;
 
 import com.hilmatrix.fresh_goodies.response.ApiResponse;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
+
+import static com.hilmatrix.fresh_goodies.products.ProductConstants.VALID_SORT_FIELDS;
 
 @RestController
 @RequestMapping("/api/v1/products")
@@ -18,35 +21,50 @@ public class ProductController {
     }
 
     @GetMapping
-    public ApiResponse<List<ProductEntity>> getAllProducts() throws IOException {
-        return new ApiResponse().Success(
-                ProductConstants.MESSAGE_SUCCESS_RETURN_ALL,
-                productRepository.findAll()
+    public ApiResponse<List<ProductEntity>> getAllProducts(
+            @RequestParam(required = false, defaultValue = "none") String _sort,
+            @RequestParam(required = false, defaultValue = "asc") String _order) throws IOException {
+        List<ProductEntity> products;
+        boolean applySort = VALID_SORT_FIELDS.contains(_sort);
+
+        if (applySort) {
+            Sort.Direction direction = "desc".equalsIgnoreCase(_order) ? Sort.Direction.DESC : Sort.Direction.ASC;
+            Sort sort = Sort.by(direction, _sort);
+            products = productRepository.findAll(sort);
+        } else {
+            products = productRepository.findAll();
+        }
+
+        return ApiResponse.Success(
+                ProductConstants.MESSAGE_SUCCESS_GET_ALL,
+                products
         );
     }
 
     @GetMapping("/{id}")
     public ApiResponse<ProductEntity> getProduct(@PathVariable int id) {
         if (productRepository.existsById(String.valueOf(id))) {
-            return new ApiResponse().Success(
-                    ProductConstants.MESSAGE_SUCCESS_RETURN_ONE,
+            return  ApiResponse.Success(
+                    ProductConstants.MESSAGE_SUCCESS_GET,
                     productRepository.getById(String.valueOf(id))
             );
         } else {
-            return new ApiResponse().NotFound(ProductConstants.MESSAGE_PRODUCT_NOT_FOUND + " = " + id, null);
+            return  ApiResponse.NotFound(
+                    ProductConstants.MESSAGE_FAILED_NOT_FOUND + " = " + id,
+                    null);
         }
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiResponse<ProductEntity> createProduct(@RequestBody ProductEntity product) {
         if (productRepository.existsById(String.valueOf(product.getId())))
-            return new ApiResponse().Conflict(ProductConstants.MESSAGE_PRODUCT_ALREADY_EXIST + " = " + product.getId(), product);
+            return ApiResponse.Conflict(ProductConstants.MESSAGE_FAILED_ALREADY_EXIST + " = " + product.getId(), product);
 
         product.getMetadata().setId(product.getId());
         ProductEntity createdProduct = productRepository.save(product);
 
-        return new ApiResponse().Success(
-                ProductConstants.MESSAGE_SUCCESS_CREATED_PRODUCT,
+        return  ApiResponse.Success(
+                ProductConstants.MESSAGE_SUCCESS_CREATE,
                 createdProduct
         );
     }
@@ -56,14 +74,14 @@ public class ProductController {
         String id = updatedProduct.getId();
 
         if (!productRepository.existsById(id))
-            return new ApiResponse().NotFound(ProductConstants.MESSAGE_PRODUCT_NOT_FOUND + " = " + id, null);
+            return ApiResponse.NotFound(ProductConstants.MESSAGE_FAILED_NOT_FOUND + " = " + id, null);
 
         ProductEntity productFromDB = productRepository.getById(id);
         productFromDB.copyFrom(updatedProduct);
         ProductEntity savedProduct = productRepository.save(productFromDB);
 
-        return new ApiResponse().Success(
-                ProductConstants.MESSAGE_SUCCESS_UPDATED_PRODUCT,
+        return ApiResponse.Success(
+                ProductConstants.MESSAGE_SUCCESS_UPDATE,
                 savedProduct
         );
     }
@@ -71,11 +89,11 @@ public class ProductController {
     @DeleteMapping("/{id}")
     public ApiResponse<Void> deleteProduct(@PathVariable String id) {
         if (!productRepository.existsById(id))
-            return new ApiResponse().NotFound(ProductConstants.MESSAGE_PRODUCT_NOT_FOUND + " = " + id, null);
+            return ApiResponse.NotFound(ProductConstants.MESSAGE_FAILED_NOT_FOUND + " = " + id, null);
 
         ProductEntity product = productRepository.getById(id);
         productRepository.delete(product);
 
-        return new ApiResponse().Success(ProductConstants.MESSAGE_SUCCESS_DELETED_PRODUCT + " = " + id, null);
+        return ApiResponse.Success(ProductConstants.MESSAGE_SUCCESS_DELETED + " = " + id, null);
     }
 }
