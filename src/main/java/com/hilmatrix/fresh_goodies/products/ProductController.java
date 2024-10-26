@@ -1,5 +1,6 @@
 package com.hilmatrix.fresh_goodies.products;
 
+import com.hilmatrix.fresh_goodies.response.ApiResponse;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,28 +17,65 @@ public class ProductController {
         this.productRepository = productRepository;
     }
 
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<ProductEntity> getAllProducts() throws IOException {
-        return productRepository.findAll();
+    @GetMapping
+    public ApiResponse<List<ProductEntity>> getAllProducts() throws IOException {
+        return new ApiResponse().Success(
+                ProductConstants.MESSAGE_SUCCESS_RETURN_ALL,
+                productRepository.findAll()
+        );
     }
 
     @GetMapping("/{id}")
-    public String getProduct(@PathVariable int id) {
-        return "get Product item ID = " + id;
+    public ApiResponse<ProductEntity> getProduct(@PathVariable int id) {
+        if (productRepository.existsById(String.valueOf(id))) {
+            return new ApiResponse().Success(
+                    ProductConstants.MESSAGE_SUCCESS_RETURN_ONE,
+                    productRepository.getById(String.valueOf(id))
+            );
+        } else {
+            return new ApiResponse().NotFound(ProductConstants.MESSAGE_PRODUCT_NOT_FOUND + " = " + id, null);
+        }
     }
 
-    @PostMapping
-    public String createProduct() {
-        return "Product created";
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ApiResponse<ProductEntity> createProduct(@RequestBody ProductEntity product) {
+        if (productRepository.existsById(String.valueOf(product.getId())))
+            return new ApiResponse().Conflict(ProductConstants.MESSAGE_PRODUCT_ALREADY_EXIST + " = " + product.getId(), product);
+
+        product.getMetadata().setId(product.getId());
+        ProductEntity createdProduct = productRepository.save(product);
+
+        return new ApiResponse().Success(
+                ProductConstants.MESSAGE_SUCCESS_CREATED_PRODUCT,
+                createdProduct
+        );
     }
 
-    @PutMapping("/{id}")
-    public String updateProduct(@PathVariable Long id) {
-        return "Product with id " + id + " updated";
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ApiResponse<ProductEntity> updateProduct(@RequestBody ProductEntity updatedProduct) {
+        String id = updatedProduct.getId();
+
+        if (!productRepository.existsById(id))
+            return new ApiResponse().NotFound(ProductConstants.MESSAGE_PRODUCT_NOT_FOUND + " = " + id, null);
+
+        ProductEntity productFromDB = productRepository.getById(id);
+        productFromDB.copyFrom(updatedProduct);
+        ProductEntity savedProduct = productRepository.save(productFromDB);
+
+        return new ApiResponse().Success(
+                ProductConstants.MESSAGE_SUCCESS_UPDATED_PRODUCT,
+                savedProduct
+        );
     }
 
     @DeleteMapping("/{id}")
-    public String deleteProduct(@PathVariable Long id) {
-        return "Product with id " + id + " deleted";
+    public ApiResponse<Void> deleteProduct(@PathVariable String id) {
+        if (!productRepository.existsById(id))
+            return new ApiResponse().NotFound(ProductConstants.MESSAGE_PRODUCT_NOT_FOUND + " = " + id, null);
+
+        ProductEntity product = productRepository.getById(id);
+        productRepository.delete(product);
+
+        return new ApiResponse().Success(ProductConstants.MESSAGE_SUCCESS_DELETED_PRODUCT + " = " + id, null);
     }
 }

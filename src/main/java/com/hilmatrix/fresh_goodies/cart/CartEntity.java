@@ -10,7 +10,6 @@ public class CartEntity {
     private String id;
     private String productId;
     private int quantity;
-
     // Getters and Setters
 }
 

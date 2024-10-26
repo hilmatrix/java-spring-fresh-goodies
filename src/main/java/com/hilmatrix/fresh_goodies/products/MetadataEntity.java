@@ -4,12 +4,11 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
+@Table(name = "metadata")
 @Data
 public class MetadataEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private String productId;
+    private String id;
     private String unit;
     private int weight;
     private int calorie;
@@ -18,5 +17,13 @@ public class MetadataEntity {
     private int increment;
     private double carbs;
 
-    // Getters and Setters
+    public void copyFrom(MetadataEntity other) {
+        this.unit = other.unit;
+        this.weight = other.weight;
+        this.calorie = other.calorie;
+        this.proteins = other.proteins;
+        this.fats = other.fats;
+        this.increment = other.increment;
+        this.carbs = other.carbs;
+    }
 }

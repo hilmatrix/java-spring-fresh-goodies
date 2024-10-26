@@ -1,4 +1,4 @@
-package com.hilmatrix.fresh_goodies.home;
+package com.hilmatrix.fresh_goodies.ping;
 
 import org.springframework.web.bind.annotation.*;
 
